@@ -63,6 +63,14 @@ jobs:
 
           echo "GREEN: Secret/private-key izi yok."
 
+      - name: Belge yapisi ve navigasyon kontrolu
+        run: |
+          python .github/scripts/belge_yapi_dogrula.py
+
+      - name: Yayin uygunluk kontrolu
+        run: |
+          python .github/scripts/yayin_uygunluk_dogrula.py
+
       - name: Yayin dosyasi siniri
         shell: bash
         run: |
