@@ -1,0 +1,90 @@
+name: Belge Guvenlik Kapisi
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  belge-guvenlik:
+    name: Belge Guvenlik Kapisi
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Repository checkout
+        uses: actions/checkout@v4
+
+      - name: Yasakli dosya kontrolu
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if find . \
+            -type f \
+            \( \
+              -name '*.jks' \
+              -o -name '*.keystore' \
+              -o -name '*.p12' \
+              -o -name '*.pfx' \
+              -o -name '*.key' \
+              -o -name '*.pem' \
+              -o -name '*.env' \
+              -o -name '*.bak' \
+            \) \
+            -not -path './.git/*' \
+            -print \
+            | grep -q .; then
+
+            echo "RED: Yasakli veya hassas dosya bulundu."
+            exit 1
+          fi
+
+          echo "GREEN: Yasakli dosya bulunmadi."
+
+      - name: Secret ve private key taramasi
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if grep -RInE \
+            'github_pat_[A-Za-z0-9_]{20,}|ghp_[A-Za-z0-9]{20,}|-----BEGIN (RSA |OPENSSH |EC )?PRIVATE KEY-----' \
+            . \
+            --exclude-dir=.git; then
+
+            echo "RED: Secret/private-key benzeri icerik bulundu."
+            exit 1
+          fi
+
+          echo "GREEN: Secret/private-key izi yok."
+
+      - name: Yayin dosyasi siniri
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if find . \
+            -type f \
+            -not -path './.git/*' \
+            -not -path './.github/*' \
+            -not -name 'README.md' \
+            \( \
+              -name '*.py' \
+              -o -name '*.pyc' \
+              -o -name '*.sqlite' \
+              -o -name '*.db' \
+              -o -name 'buildozer.spec' \
+            \) \
+            -print \
+            | grep -q .; then
+
+            echo "RED: Uygulama kaynak/veritabani dosyasi bulundu."
+            exit 1
+          fi
+
+          echo "GREEN: Yayin deposu dosya siniri temiz."
