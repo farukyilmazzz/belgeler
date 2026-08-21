@@ -123,7 +123,7 @@ def main() -> None:
             "Hesap ve Veri Silme",
             "Silme talebi",
             "Kimlik doğrulama",
-            "Silinebilecek veriler",
+            "Silinecek veriler",
         ),
         "Hesap ve Veri Silme",
     )
